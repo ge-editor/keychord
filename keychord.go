@@ -284,9 +284,16 @@ func (r *RootNode) Dispatch(ev tcell.EventKey) (string, KeyDispatchTransition) {
 		)
 	}()
 
+	// 全角ASCII文字、日本語母音 preedit を吸収
+	// 余分な Enter 入力が追加になるが、入力の流れが止まることを多少改善か
+	s := ev.Str()
+	if len(s) > 2 {
+		r, _ := utf8.DecodeRuneInString(s)
+		s = string(NormalizeLocaleASCII(r))
+	}
 	k := KeySpec{
 		Key: ev.Key(),
-		Str: ev.Str(),
+		Str: s, // ev.Str(),
 		Mod: ev.Modifiers(),
 	}
 

@@ -12,6 +12,21 @@ built on top of `github.com/gdamore/tcell/v3`.
 
 ---
 
+## Locale-aware Input Strategy
+
+Key chord interpretation is inherently locale and IME dependent.
+
+For example, in Japanese IME environments, vowel keys may be immediately converted into preedit characters (`i → い`) before key chord matching occurs.
+Other languages such as Korean, Chinese, and Vietnamese have different composition behaviors that can also affect key sequence interpretation.
+
+Because of this, the `keychord` package is designed with the assumption that key interpretation strategies should be replaceable per locale / input method.
+
+> keychord package は locale 別に交換されるべきです。
+
+Applications are encouraged to provide locale-aware key normalization or input strategies depending on the user's keyboard and IME behavior.
+
+---
+
 ## Features
 
 ### ✅ Based on tcell/v3
@@ -273,6 +288,4 @@ Internal logging uses `github.com/ge-editor/gelog`.
 
 ## License
 
-MIT License
-
----
+This package is licensed under the MIT License.
