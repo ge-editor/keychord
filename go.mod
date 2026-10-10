@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/gdamore/tcell/v3 v3.5.0
-	github.com/ge-editor/gelog v0.1.8
+	github.com/ge-editor/gelog v0.1.15
 )
 
 require (
