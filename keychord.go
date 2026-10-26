@@ -9,8 +9,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/gdamore/tcell/v3"
-
-	"github.com/ge-editor/gelog"
 )
 
 type KeySpec struct {
@@ -41,7 +39,7 @@ func (d DecodedKey) KeySpec() KeySpec {
 func Decode(s string) (DecodedKey, error) {
 	var out DecodedKey
 	if s == "" {
-		gelog.Key("[Decode:invalid]", "reason", "empty", "s", s)
+		// gelog.Key("[Decode:invalid]", "reason", "empty", "s", s)
 		return out, ErrInvalidKeyEvent
 	}
 
@@ -155,14 +153,10 @@ type RootNode struct {
 var rootNodes []*RootNode
 
 func ResetAllRootNodes() {
-	gelog.Key("[KeyDispatch:ResetAllRootNodes]",
-		"count", len(rootNodes),
-	)
+	// gelog.Key("[KeyDispatch:ResetAllRootNodes]", "count", len(rootNodes))
 
-	for i, r := range rootNodes {
-		gelog.Key("[KeyDispatch:ResetRoot]",
-			"index", i,
-		)
+	for _, r := range rootNodes {
+		// gelog.Key("[KeyDispatch:ResetRoot]", "index", i)
 
 		r.Reset()
 	}
@@ -225,10 +219,10 @@ func (r *RootNode) Reset() {
 
 var dispatchSeq uint64
 
-func nextDispatchID() uint64 {
+/* func nextDispatchID() uint64 {
 	dispatchSeq++
 	return dispatchSeq
-}
+} */
 
 type KeyDispatchTransition int
 
@@ -254,7 +248,7 @@ func (r KeyDispatchTransition) String() string {
 	}
 }
 
-func nodeName(n *KeyNode) string {
+/* func nodeName(n *KeyNode) string {
 	if n == nil {
 		return "<nil>"
 	}
@@ -262,27 +256,27 @@ func nodeName(n *KeyNode) string {
 		return "<root>"
 	}
 	return n.KeyStr
-}
+} */
 
 // Dispatch 入力イベントに応じてキーバインドを実行
 func (r *RootNode) Dispatch(ev tcell.EventKey) (string, KeyDispatchTransition) {
-	id := nextDispatchID()
+	/*id := nextDispatchID()
 
-	gelog.Key("[KeyDispatch:start]",
+	 gelog.Key("[KeyDispatch:start]",
 		"id", id,
 		"key", ev.Key(),
 		"str", ev.Str(),
 		"mod", ev.Modifiers(),
 		"current", nodeName(r.current),
-	)
+	) */
 
-	defer func() {
+	/* defer func() {
 		gelog.Key("[KeyDispatch:end]",
 			"id", id,
 			"current", nodeName(r.current),
 			"status", r.keyStatus,
 		)
-	}()
+	}() */
 
 	// 全角ASCII文字、日本語母音 preedit を吸収
 	// 余分な Enter 入力が追加になるが、入力の流れが止まることを多少改善か
@@ -303,11 +297,11 @@ func (r *RootNode) Dispatch(ev tcell.EventKey) (string, KeyDispatchTransition) {
 
 	// ユーザー独自のキーイベント関数が登録されている場合
 	if r.keyEvent != nil {
-		gelog.Key("[KeyDispatch:user-function]",
+		/* gelog.Key("[KeyDispatch:user-function]",
 			"id", id,
 			"from", nodeName(r.current),
 			"key", k,
-		)
+		) */
 
 		keyStr, dispatchResult := r.keyEvent(ev)
 		if dispatchResult == DispatchExecuted {
@@ -322,11 +316,12 @@ func (r *RootNode) Dispatch(ev tcell.EventKey) (string, KeyDispatchTransition) {
 
 	node, ok := r.current.Next[k]
 	if !ok {
-		gelog.Key("[KeyDispatch:not-found]",
+		/* gelog.Key("[KeyDispatch:not-found]",
 			"id", id,
 			"from", nodeName(r.current),
 			"key", k,
-		)
+		) */
+
 		// 存在しないキーなら状態リセット
 		result := DispatchNotFound
 		if r.current != r.root {
@@ -339,40 +334,40 @@ func (r *RootNode) Dispatch(ev tcell.EventKey) (string, KeyDispatchTransition) {
 		return r.keyStatus, result
 	}
 
-	gelog.Key("[KeyDispatch:found]",
+	/* gelog.Key("[KeyDispatch:found]",
 		"id", id,
 		"from", nodeName(r.current),
 		"to", nodeName(node),
 		"hasAction", node.Action != nil,
 		"hasNext", len(node.Next) > 0,
-	)
+	) */
 
 	if node.Action != nil {
-		gelog.Key("[KeyDispatch:action]",
+		/* gelog.Key("[KeyDispatch:action]",
 			"id", id,
 			"key", node.KeyStr,
-		)
+		) */
 
 		res := node.Action()
 
-		gelog.Key("[KeyDispatch:action-result]",
+		/* gelog.Key("[KeyDispatch:action-result]",
 			"id", id,
 			"result", res,
-		)
+		) */
 
 		if res == DispatchExecuted {
 			r.Reset()
-			gelog.Key("[KeyDispatch:reset]", "id", id)
+			// gelog.Key("[KeyDispatch:reset]", "id", id)
 		}
 		return r.keyStatus, res
 	}
 
 	if len(node.Next) > 0 {
-		gelog.Key("[KeyDispatch:prefix]",
+		/* gelog.Key("[KeyDispatch:prefix]",
 			"id", id,
 			"to", nodeName(node),
 			"candidates", r.Candidates(),
-		)
+		) */
 
 		// gelog.Key("プレフィックスキー → 次の入力待ち")
 		// プレフィックスキー → 次の入力待ち
@@ -393,7 +388,7 @@ func (r *RootNode) appendKeyStatus(n *KeyNode) {
 		r.keyStatus += " "
 	}
 	r.keyStatus += formatMods(n.KeyStr)
-	gelog.Key("KeyStatus", r.keyStatus)
+	// gelog.Key("KeyStatus", r.keyStatus)
 }
 
 func (r *RootNode) Candidates() []string {
