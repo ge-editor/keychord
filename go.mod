@@ -2,10 +2,7 @@ module github.com/ge-editor/keychord
 
 go 1.26.0
 
-require (
-	github.com/gdamore/tcell/v3 v3.6.0
-	github.com/ge-editor/gelog v0.1.15
-)
+require github.com/gdamore/tcell/v3 v3.6.0
 
 require (
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
