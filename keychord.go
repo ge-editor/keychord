@@ -258,6 +258,24 @@ func (r KeyDispatchTransition) String() string {
 	return n.KeyStr
 } */
 
+// normalizeAltEnter turns Ctrl+Alt+m into Alt+Enter.
+//
+// A terminal sends Alt+Enter as ESC CR (1b 0d), which it cannot tell apart
+// from Ctrl+Alt+m. The input parser may report it as Alt+Ctrl with the key
+// 'm' (or Ctrl-M), so it would never match a binding of "Alt+Enter".
+func normalizeAltEnter(k KeySpec) KeySpec {
+	const want = tcell.ModAlt | tcell.ModCtrl
+	if k.Mod&want != want {
+		return k
+	}
+	ctrlM := tcell.Key('m'-'a') + tcell.KeyCtrlA
+	if k.Key == tcell.KeyEnter || k.Key == ctrlM ||
+		(k.Key == tcell.KeyRune && (k.Str == "m" || k.Str == "M")) {
+		return KeySpec{Key: tcell.KeyEnter, Mod: k.Mod &^ tcell.ModCtrl}
+	}
+	return k
+}
+
 // Dispatch 入力イベントに応じてキーバインドを実行
 func (r *RootNode) Dispatch(ev tcell.EventKey) (string, KeyDispatchTransition) {
 	/*id := nextDispatchID()
@@ -285,11 +303,11 @@ func (r *RootNode) Dispatch(ev tcell.EventKey) (string, KeyDispatchTransition) {
 		r, _ := utf8.DecodeRuneInString(s)
 		s = string(NormalizeLocaleASCII(r))
 	}
-	k := KeySpec{
+	k := normalizeAltEnter(KeySpec{
 		Key: ev.Key(),
 		Str: s, // ev.Str(),
 		Mod: ev.Modifiers(),
-	}
+	})
 
 	if r.current == nil {
 		r.current = r.root
